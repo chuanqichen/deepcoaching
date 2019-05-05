@@ -3,15 +3,7 @@
 #Configuration
 Environment file: 
 
-#Data Set
 
-#Network 
-
-#Experiments
-
-#Results
-
-#Future Works
 
 
 
