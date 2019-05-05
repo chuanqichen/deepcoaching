@@ -1,7 +1,7 @@
 # Sports Coaching from Pose Estimation
 
 #Configuration
-Environment file: 
+Conda environment file: environment.yml
 
 
 
