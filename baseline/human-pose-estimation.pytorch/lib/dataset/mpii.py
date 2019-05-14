@@ -37,7 +37,6 @@ class MPIIDataset(JointsDataset):
             self.db = self.select_data(self.db)
             
         if is_eval:
-#             print(self.db[0])
             self.db = [self.db[0]]
             self.db[0]['image'] = eval_image
 
@@ -78,10 +77,7 @@ class MPIIDataset(JointsDataset):
                 joints = np.array(a['joints'])
                 joints[:, 0:2] = joints[:, 0:2] - 1
                 joints_vis = np.array(a['joints_vis'])
-                assert len(joints) == self.num_joints, \
-                    'joint num diff: {} vs {}'.format(len(joints),
-                                                      self.num_joints)
-
+                assert len(joints) == self.num_joints, 'joint num diff: {} vs {}'.format(len(joints), self.num_joints)
                 joints_3d[:, 0:2] = joints[:, 0:2]
                 joints_3d_vis[:, 0] = joints_vis[:]
                 joints_3d_vis[:, 1] = joints_vis[:]
@@ -89,7 +85,7 @@ class MPIIDataset(JointsDataset):
             image_dir = 'images.zip@' if self.data_format == 'zip' else 'images'
             
             # restrict it to just sports stuff. 677 samples
-            if activities[image_name]['act_name'] != 'golf':
+            if activities[image_name]['cat_name'] != 'winter activities':
                 self.removed.append(index)
                 continue
             self.kept.append(index)

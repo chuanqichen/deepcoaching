@@ -221,7 +221,7 @@ def evaluate(config, val_loader, val_dataset, model, output_dir):
     
     with torch.no_grad():
         for i, (input, _, _, meta) in enumerate(val_loader):
-            
+                        
             # compute output
             output = model(input)
             pred, _ = get_max_preds(output.cpu().numpy())
@@ -235,7 +235,7 @@ def evaluate(config, val_loader, val_dataset, model, output_dir):
             prefix = '{}_{}'.format(os.path.join(output_dir, 'val'), i)
             save_output_images(config, input, meta, pred*4, prefix)
       
-    # TODO save output image and output points
+    # TODO save output points for analysis
     
     return    
     

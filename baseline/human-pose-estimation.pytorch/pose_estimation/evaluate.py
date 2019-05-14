@@ -141,12 +141,11 @@ def main():
             normalize,
         ]),
         is_eval=True,
-        eval_image='/home/shared/data/mpii/images/050240222.jpg' # NOTE: Change this to run on arbitrary image
+        eval_image='/home/shared/deepcoaching/custom_data/pro4.jpg' # NOTE: Change this to run on arbitrary image
     )
-    
-    # TODO figure out why it blows up on custom images
-    
-    # eval_image='/home/shared/deepcoaching/custom_data/michael_jordan.jpg' # NOTE: Change this to run on arbitrary image
+        
+    # '/home/shared/data/mpii/images/050240222.jpg'
+    # '/home/shared/deepcoaching/custom_data/michael_jordan.jpg'
 
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset,

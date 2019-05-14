@@ -100,13 +100,17 @@ class JointsDataset(Dataset):
                     joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
                 c[0] = data_numpy.shape[1] - c[0] - 1
 
+                
         trans = get_affine_transform(c, s, r, self.image_size)
+        
+        # NOTE: This scales images and crops them to be 256*256. During eval, replace with input = data_numpy   
+#         input = data_numpy
         input = cv2.warpAffine(
             data_numpy,
             trans,
             (int(self.image_size[0]), int(self.image_size[1])),
             flags=cv2.INTER_LINEAR)
-
+        
         if self.transform:
             input = self.transform(input)
 
