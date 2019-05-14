@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class MPIIDataset(JointsDataset):
-    def __init__(self, cfg, root, image_set, is_train, transform=None):
+    def __init__(self, cfg, root, image_set, is_train, transform=None, is_eval=False, eval_image=''):
         super().__init__(cfg, root, image_set, is_train, transform)
 
         self.num_joints = 16
@@ -35,19 +35,24 @@ class MPIIDataset(JointsDataset):
 
         if is_train and cfg.DATASET.SELECT_DATA:
             self.db = self.select_data(self.db)
+            
+        if is_eval:
+#             print(self.db[0])
+            self.db = [self.db[0]]
+            self.db[0]['image'] = eval_image
 
         logger.info('=> load {} samples'.format(len(self.db)))
 
     def _get_db(self):
         # create train/val split
-        file_name = os.path.join(self.root,
-                                 'annot',
-                                 self.image_set+'.json')
+        file_name = os.path.join(self.root, 'annot', self.image_set+'.json')
+        
         with open(file_name) as anno_file:
             anno = json.load(anno_file)
 
         with open('image_name_to_activity.json') as json_file:  
             activities = og_json.load(json_file)
+        
         self.removed = []
         self.kept = []
             
@@ -84,7 +89,7 @@ class MPIIDataset(JointsDataset):
             image_dir = 'images.zip@' if self.data_format == 'zip' else 'images'
             
             # restrict it to just sports stuff. 677 samples
-            if activities[image_name]['cat_name'] != 'sports':
+            if activities[image_name]['act_name'] != 'golf':
                 self.removed.append(index)
                 continue
             self.kept.append(index)
@@ -98,7 +103,7 @@ class MPIIDataset(JointsDataset):
                 'filename': '',
                 'imgnum': 0,
                 })
-
+    
         return gt_db
 
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
