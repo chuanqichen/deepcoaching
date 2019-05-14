@@ -149,10 +149,6 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
             preds, maxvals = get_final_preds(
                 config, output.clone().cpu().numpy(), c, s)
-            
-            # print('input', input.shape)   # 32, 3, 256, 256
-            # print('output', output.shape) # 32, 16, 64, 64
-            # print('preds', preds.shape) # 5, 16, 2
 
             all_preds[idx:idx + num_images, :, 0:2] = preds[:, :, 0:2]
             all_preds[idx:idx + num_images, :, 2:3] = maxvals
@@ -168,7 +164,6 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
             idx += num_images
 
-            print('i', i)
             if i % config.PRINT_FREQ == 0:
                 msg = 'Test: [{0}/{1}]\t' \
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t' \
