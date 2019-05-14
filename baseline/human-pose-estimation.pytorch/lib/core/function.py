@@ -19,8 +19,8 @@ from core.config import get_model_name
 from core.evaluate import accuracy
 from core.inference import get_final_preds
 from utils.transforms import flip_back
-from utils.vis import save_debug_images
-
+from utils.vis import save_output_images, save_debug_images
+from core.inference import get_max_preds
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +149,10 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
             preds, maxvals = get_final_preds(
                 config, output.clone().cpu().numpy(), c, s)
+            
+            # print('input', input.shape)   # 32, 3, 256, 256
+            # print('output', output.shape) # 32, 16, 64, 64
+            # print('preds', preds.shape) # 5, 16, 2
 
             all_preds[idx:idx + num_images, :, 0:2] = preds[:, :, 0:2]
             all_preds[idx:idx + num_images, :, 2:3] = maxvals
@@ -164,6 +168,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
             idx += num_images
 
+            print('i', i)
             if i % config.PRINT_FREQ == 0:
                 msg = 'Test: [{0}/{1}]\t' \
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t' \
@@ -176,7 +181,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
                 prefix = '{}_{}'.format(os.path.join(output_dir, 'val'), i)
                 save_debug_images(config, input, meta, target, pred*4, output,
                                   prefix)
-
+      
         name_values, perf_indicator = val_dataset.evaluate(
             config, all_preds, output_dir, all_boxes, image_path,
             filenames, imgnums)
@@ -202,7 +207,44 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
     return perf_indicator
 
+def evaluate(config, val_loader, val_dataset, model, output_dir):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    acc = AverageMeter()
 
+    # switch to evaluate mode
+    model.eval()
+
+    num_samples = len(val_dataset)
+    all_preds = np.zeros((num_samples, config.MODEL.NUM_JOINTS, 3),
+                         dtype=np.float32)
+    all_boxes = np.zeros((num_samples, 6))
+    image_path = []
+    filenames = []
+    imgnums = []
+    idx = 0
+    
+    with torch.no_grad():
+        for i, (input, _, _, meta) in enumerate(val_loader):
+            
+            # compute output
+            output = model(input)
+            pred, _ = get_max_preds(output.cpu().numpy())
+
+            image_path.extend(meta['image'])
+            
+            if config.DATASET.DATASET == 'posetrack':
+                filenames.extend(meta['filename'])
+                imgnums.extend(meta['imgnum'].numpy())
+
+            prefix = '{}_{}'.format(os.path.join(output_dir, 'val'), i)
+            save_output_images(config, input, meta, pred*4, prefix)
+      
+    # TODO save output image and output points
+    
+    return    
+    
+    
 # markdown format output
 def _print_name_value(name_value, full_arch_name):
     names = name_value.keys()
