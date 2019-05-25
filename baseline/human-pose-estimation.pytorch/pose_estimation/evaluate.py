@@ -150,7 +150,7 @@ def main():
             normalize,
         ]),
         is_eval=True,
-        eval_image='/home/shared/deepcoaching/custom_data/pro3.jpg' # NOTE: Change this to run on arbitrary image
+        eval_image='/home/shared/deepcoaching/custom_data/pro4.jpg' # NOTE: Change this to run on arbitrary image
     )
         
     # '/home/shared/data/mpii/images/050240222.jpg'
