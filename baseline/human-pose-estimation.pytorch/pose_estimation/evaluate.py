@@ -35,6 +35,7 @@ import models
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')
+    
     # general
     parser.add_argument('--cfg',
                         help='experiment configure file name',
@@ -42,6 +43,7 @@ def parse_args():
                         type=str)
 
     args, rest = parser.parse_known_args()
+    
     # update config
     update_config(args.cfg)
 
@@ -74,7 +76,9 @@ def parse_args():
     parser.add_argument('--coco-bbox-file',
                         help='coco detection bbox file',
                         type=str)
-
+    parser.add_argument('--out_file',
+                        help='name for the saved image output',
+                        type=str)
     
     args = parser.parse_args()
 
@@ -98,7 +102,12 @@ def reset_config(config, args):
         config.TEST.MODEL_FILE = args.model_file
     if args.coco_bbox_file:
         config.TEST.COCO_BBOX_FILE = args.coco_bbox_file
+    if args.out_file:
+        config.OUT_FILE = args.out_file
 
+    # used to note that we don't have center/scale data
+    config.TEST_MODE = True
+        
 
 def main():
     args = parse_args()
@@ -141,7 +150,7 @@ def main():
             normalize,
         ]),
         is_eval=True,
-        eval_image='/home/shared/deepcoaching/custom_data/pro4.jpg' # NOTE: Change this to run on arbitrary image
+        eval_image='/home/shared/deepcoaching/custom_data/pro3.jpg' # NOTE: Change this to run on arbitrary image
     )
         
     # '/home/shared/data/mpii/images/050240222.jpg'

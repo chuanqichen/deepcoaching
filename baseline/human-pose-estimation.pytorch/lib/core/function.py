@@ -233,6 +233,9 @@ def evaluate(config, val_loader, val_dataset, model, output_dir):
                 imgnums.extend(meta['imgnum'].numpy())
 
             prefix = '{}_{}'.format(os.path.join(output_dir, 'val'), i)
+            if 'OUT_FILE' in config:
+                prefix = os.path.join(output_dir, config.OUT_FILE)
+            
             save_output_images(config, input, meta, pred*4, prefix)
       
     # TODO save output points for analysis

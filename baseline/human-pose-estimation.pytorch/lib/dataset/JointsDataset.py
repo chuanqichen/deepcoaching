@@ -48,6 +48,8 @@ class JointsDataset(Dataset):
         self.heatmap_size = cfg.MODEL.EXTRA.HEATMAP_SIZE
         self.sigma = cfg.MODEL.EXTRA.SIGMA
 
+        self.cfg = cfg
+        
         self.transform = transform
         self.db = []
 
@@ -104,12 +106,13 @@ class JointsDataset(Dataset):
         trans = get_affine_transform(c, s, r, self.image_size)
         
         # NOTE: This scales images and crops them to be 256*256. During eval, replace with input = data_numpy   
-#         input = data_numpy
-        input = cv2.warpAffine(
-            data_numpy,
-            trans,
-            (int(self.image_size[0]), int(self.image_size[1])),
-            flags=cv2.INTER_LINEAR)
+        input = data_numpy
+        if not 'TEST_MODE' in self.cfg:
+            input = cv2.warpAffine(
+                data_numpy,
+                trans,
+                (int(self.image_size[0]), int(self.image_size[1])),
+                flags=cv2.INTER_LINEAR)
         
         if self.transform:
             input = self.transform(input)
