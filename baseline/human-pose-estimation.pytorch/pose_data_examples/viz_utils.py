@@ -181,3 +181,8 @@ def compute_group_variance():
 # for report: per joint variance in pros and amateurs
 # example comparing an amatuer to pro mean with highlights of what's wrong
 # maybe more stats (like spine angle)
+
+"""
+1) per-joint variance amongst pros vs per pose variance amongst amateurs - variance will be lower among pros, which validates our general idea of using pose data for coaching.
+2) per-joint similarity of some amateurs to the all the pros averaged together, highlighting some parts of the pose that are "better" (closer to pro) than others
+"""
