@@ -90,7 +90,7 @@ def main():
     torch.backends.cudnn.enabled = config.CUDNN.ENABLED
 
     model = eval('models.'+config.MODEL.NAME+'.get_pose_net')(
-        config, is_train=True
+        config, is_train=False
     )
 
     # copy model file

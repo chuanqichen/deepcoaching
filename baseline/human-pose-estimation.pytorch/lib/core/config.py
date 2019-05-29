@@ -62,7 +62,7 @@ config.LOSS.USE_TARGET_WEIGHT = True
 
 # DATASET related params
 config.DATASET = edict()
-config.DATASET.ROOT = ''
+config.DATASET.ROOT = '/home/shared/deepcoaching/baseline/human-pose-estimation.pytorch/data/mpii'
 config.DATASET.DATASET = 'mpii'
 config.DATASET.TRAIN_SET = 'train'
 config.DATASET.TEST_SET = 'valid'
@@ -90,7 +90,7 @@ config.TRAIN.GAMMA1 = 0.99
 config.TRAIN.GAMMA2 = 0.0
 
 config.TRAIN.BEGIN_EPOCH = 0
-config.TRAIN.END_EPOCH = 140
+config.TRAIN.END_EPOCH = 1
 
 config.TRAIN.RESUME = False
 config.TRAIN.CHECKPOINT = ''
