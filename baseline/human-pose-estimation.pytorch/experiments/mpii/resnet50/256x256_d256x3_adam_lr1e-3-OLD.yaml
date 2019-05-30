@@ -18,7 +18,7 @@ DATASET:
   SCALE_FACTOR: 0.25
 MODEL:
   NAME: pose_resnet
-  PRETRAINED: 'models/pytorch/imagenet/resnet152-b121ed2d.pth'
+  PRETRAINED: 'models/pytorch/imagenet/resnet50-19c8e357.pth'
   IMAGE_SIZE:
   - 256
   - 256
@@ -40,15 +40,15 @@ MODEL:
     - 4
     - 4
     - 4
-    NUM_LAYERS: 152
+    NUM_LAYERS: 50
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
   BATCH_SIZE: 32
   SHUFFLE: true
   BEGIN_EPOCH: 0
-  END_EPOCH: 140
-  RESUME: false
+  END_EPOCH: 15
+  RESUME: true
   OPTIMIZER: adam
   LR: 0.001
   LR_FACTOR: 0.1

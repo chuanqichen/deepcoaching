@@ -20,10 +20,70 @@ BN_MOMENTUM = 0.1
 logger = logging.getLogger(__name__)
 
 
+def conv5x5(in_planes, out_planes, stride=1):
+    """5x5 convolution with padding"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=5, stride=stride,
+                     padding=2, bias=False)
+
+
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
+
+
+def conv1x1(in_planes, out_planes, stride=1):
+    """1x1 convolution"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride,
+                     padding=0, bias=False)
+
+
+class InceptionBlock(nn.Module):
+    expansion = 4
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(InceptionBlock, self).__init__()
+        self.filter_output = self.expansion / 4
+        self.conv1_tower1 = conv1x1(inplanes, int(planes/self.filter_output), stride)
+        self.bn1_tower1 = nn.BatchNorm2d(int(planes/self.filter_output), momentum=BN_MOMENTUM)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv1_tower2 = conv1x1(inplanes, int(planes/self.filter_output), stride=1)
+        self.bn1_tower2 = nn.BatchNorm2d(int(planes/self.filter_output), momentum=BN_MOMENTUM)
+        self.conv3_tower2 = conv3x3(int(planes/self.filter_output), int(planes/self.filter_output), stride)
+        self.bn2_tower2 = nn.BatchNorm2d(int(planes/self.filter_output), momentum=BN_MOMENTUM)
+        self.conv1_tower3 = conv1x1(inplanes, int(planes/self.filter_output), stride=1)
+        self.bn1_tower3 = nn.BatchNorm2d(int(planes/self.filter_output), momentum=BN_MOMENTUM)
+        self.conv5_tower3 = conv5x5(int(planes/self.filter_output), int(planes/self.filter_output), stride)
+        self.bn2_tower3 = nn.BatchNorm2d(int(planes/self.filter_output), momentum=BN_MOMENTUM)
+        self.max_pool_tower4 = nn.MaxPool2d(3, stride=1, padding=1)
+        self.conv1_tower4 = conv1x1(inplanes, int(planes/self.filter_output), stride)
+        self.downsample = downsample
+        self.stride = stride
+    def forward(self, x):
+        residual = x
+        tower_1 = self.conv1_tower1(x)
+        tower_1 = self.bn1_tower1(tower_1)
+        tower_1 = self.relu(tower_1)
+        tower_2 = self.conv1_tower2(x)
+        tower_2 = self.bn1_tower2(tower_2)
+        tower_2 = self.relu(tower_2)
+        tower_2 = self.conv3_tower2(tower_2)
+        tower_2 = self.bn2_tower2(tower_2)
+        tower_2 = self.relu(tower_2)
+        tower_3 = self.conv1_tower3(x)
+        tower_3 = self.bn1_tower3(tower_3)
+        tower_3 = self.relu(tower_3)
+        tower_3 = self.conv5_tower3(tower_3)
+        tower_3 = self.bn2_tower3(tower_3)
+        tower_3 = self.relu(tower_3)
+        tower_4 = self.max_pool_tower4(x)
+        tower_4 = self.conv1_tower4(tower_4)
+        tower_4 = self.relu(tower_4)
+        out = torch.cat((tower_1, tower_2, tower_3, tower_4), 1)
+        if self.downsample is not None:
+            residual = self.downsample(x)
+        out += residual
+        out = self.relu(out)
+        return out
 
 
 class BasicBlock(nn.Module):
@@ -310,10 +370,16 @@ def get_pose_net(cfg, is_train, **kwargs):
     style = cfg.MODEL.STYLE
 
     block_class, layers = resnet_spec[num_layers]
+    if cfg.MODEL.BLOCK == "InceptionBlock":
+        block_class = InceptionBlock
+    # TODO: remove
+    # block_class = InceptionBlock
 
     if style == 'caffe':
         block_class = Bottleneck_CAFFE
-
+    
+    # TODO: remove
+    block_class = InceptionBlock
     model = PoseResNet(block_class, layers, cfg, **kwargs)
 
     if is_train and cfg.MODEL.INIT_WEIGHTS:

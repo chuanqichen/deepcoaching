@@ -49,6 +49,7 @@ MODEL_EXTRAS = {
 # common params for NETWORK
 config.MODEL = edict()
 config.MODEL.NAME = 'pose_resnet'
+config.MODEL.BLOCK = 'InceptionBlock'
 config.MODEL.INIT_WEIGHTS = True
 config.MODEL.PRETRAINED = ''
 config.MODEL.NUM_JOINTS = 16
