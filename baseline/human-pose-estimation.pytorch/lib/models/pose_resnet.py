@@ -370,16 +370,16 @@ def get_pose_net(cfg, is_train, **kwargs):
     style = cfg.MODEL.STYLE
 
     block_class, layers = resnet_spec[num_layers]
+    
     if cfg.MODEL.BLOCK == "InceptionBlock":
         block_class = InceptionBlock
-    # TODO: remove
-    # block_class = InceptionBlock
 
     if style == 'caffe':
         block_class = Bottleneck_CAFFE
     
     # TODO: remove
-    block_class = InceptionBlock
+    # block_class = InceptionBlock
+
     model = PoseResNet(block_class, layers, cfg, **kwargs)
 
     if is_train and cfg.MODEL.INIT_WEIGHTS:

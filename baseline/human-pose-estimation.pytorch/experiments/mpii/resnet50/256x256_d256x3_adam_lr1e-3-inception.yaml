@@ -1,6 +1,6 @@
 GPUS: '0'
 DATA_DIR: ''
-OUTPUT_DIR: 'output'
+OUTPUT_DIR: 'output_inception'
 LOG_DIR: 'log'
 WORKERS: 4
 PRINT_FREQ: 100
@@ -18,7 +18,6 @@ DATASET:
   SCALE_FACTOR: 0.25
 MODEL:
   NAME: pose_resnet
-  BLOCK: notInception
   PRETRAINED: 'models/pytorch/imagenet/resnet50-19c8e357.pth'
   IMAGE_SIZE:
   - 256
@@ -48,7 +47,7 @@ TRAIN:
   BATCH_SIZE: 32
   SHUFFLE: true
   BEGIN_EPOCH: 0
-  END_EPOCH: 15
+  END_EPOCH: 10
   RESUME: true
   OPTIMIZER: adam
   LR: 0.001

@@ -54,7 +54,6 @@ class MPIIDataset(JointsDataset):
         
         self.removed = []
         self.kept = []
-        self.augmented = []
             
         gt_db = []
         for index, a in enumerate(anno):
@@ -102,22 +101,6 @@ class MPIIDataset(JointsDataset):
                 'imgnum': 0,
                 })
     
-    
-            # Also append an augmented version. TODO actually do augmentation 
-            if index % 100 == 0:
-                print('AUGMENTING')
-                self.augmented.append(index)
-                gt_db.append({
-                    'image': os.path.join(self.root, image_dir, image_name),
-                    'center': c,
-                    'scale': s,
-                    'joints_3d': joints_3d,
-                    'joints_3d_vis': joints_3d_vis,
-                    'filename': '',
-                    'imgnum': 0,
-                    })
-            
-    
         return gt_db
 
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
@@ -146,13 +129,10 @@ class MPIIDataset(JointsDataset):
         # use self.kept in case any data was filtered (or added) 
         dataset_joints = gt_dict['dataset_joints']
 
-        # TODO actually augment the ground truth
-        jnt_missing = np.concatenate((jnt_missing[:, self.kept], jnt_missing[:, self.augmented]), axis=1)
-        pos_gt_src = np.concatenate((pos_gt_src[:, :, self.kept], pos_gt_src[:, :, self.augmented]), axis=2)
-        headboxes_src = np.concatenate((headboxes_src[:, :, self.kept], headboxes_src[:, :, self.augmented]), axis=2)
-        
-
-        
+        jnt_missing = jnt_missing[:, self.kept]
+        pos_gt_src = pos_gt_src[:, :, self.kept]
+        headboxes_src = headboxes_src[:, :, self.kept]
+                
         pos_pred_src = np.transpose(preds, [1, 2, 0])
 
         head = np.where(dataset_joints == 'head')[1][0]

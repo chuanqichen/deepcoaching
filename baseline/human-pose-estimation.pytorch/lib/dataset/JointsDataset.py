@@ -42,7 +42,9 @@ class JointsDataset(Dataset):
         self.scale_factor = cfg.DATASET.SCALE_FACTOR
         self.rotation_factor = cfg.DATASET.ROT_FACTOR
         self.flip = cfg.DATASET.FLIP
-
+        self.brighten = cfg.DATASET.BRIGHTEN
+        self.darken = cfg.DATASET.DARKEN
+        
         self.image_size = cfg.MODEL.IMAGE_SIZE
         self.target_type = cfg.MODEL.EXTRA.TARGET_TYPE
         self.heatmap_size = cfg.MODEL.EXTRA.HEATMAP_SIZE
@@ -80,7 +82,7 @@ class JointsDataset(Dataset):
         if data_numpy is None:
             logger.error('=> fail to read {}'.format(image_file))
             raise ValueError('Fail to read {}'.format(image_file))
-
+            
         joints = db_rec['joints_3d']
         joints_vis = db_rec['joints_3d_vis']
 
@@ -89,19 +91,30 @@ class JointsDataset(Dataset):
         score = db_rec['score'] if 'score' in db_rec else 1
         r = 0
 
+        ############################################## data augmentation
         if self.is_train:
+            
+            # scale and rotation augmentation
             sf = self.scale_factor
             rf = self.rotation_factor
-            s = s * np.clip(np.random.randn()*sf + 1, 1 - sf, 1 + sf)
-            r = np.clip(np.random.randn()*rf, -rf*2, rf*2) \
-                if random.random() <= 0.6 else 0
+            s = s * np.clip(np.random.randn() * sf + 1, 1 - sf, 1 + sf)
+            r = np.clip(np.random.randn() * rf, -rf*2, rf*2) if random.random() <= 0.6 else 0
 
+            # flips images
             if self.flip and random.random() <= 0.5:
                 data_numpy = data_numpy[:, ::-1, :]
-                joints, joints_vis = fliplr_joints(
-                    joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
+                joints, joints_vis = fliplr_joints(joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
                 c[0] = data_numpy.shape[1] - c[0] - 1
-
+            
+            # brighten image by shifting up all pixels
+            if self.brighten and random.random() <= 0.5:
+                shift = 10 * np.random.randn() + 20
+                data_numpy = np.fmax(data_numpy + shift, 255) 
+            
+            # darken image by shifting up all pixels
+            if self.darken and random.random() <= 0.5:
+                shift = 10 * np.random.randn() + 20
+                data_numpy = np.fmin(data_numpy - shift, 0)
                 
         trans = get_affine_transform(c, s, r, self.image_size)
         

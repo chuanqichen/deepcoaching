@@ -16,6 +16,8 @@ DATASET:
   FLIP: true
   ROT_FACTOR: 30
   SCALE_FACTOR: 0.25
+  BRIGHTEN: True
+  DARKEN: True
 MODEL:
   NAME: pose_resnet
   BLOCK: notInception

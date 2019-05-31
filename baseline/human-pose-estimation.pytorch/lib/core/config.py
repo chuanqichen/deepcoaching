@@ -75,6 +75,8 @@ config.DATASET.SELECT_DATA = False
 config.DATASET.FLIP = True
 config.DATASET.SCALE_FACTOR = 0.25
 config.DATASET.ROT_FACTOR = 30
+config.DATASET.BRIGHTEN = False
+config.DATASET.DARKEN = False
 
 # train
 config.TRAIN = edict()
@@ -91,7 +93,7 @@ config.TRAIN.GAMMA1 = 0.99
 config.TRAIN.GAMMA2 = 0.0
 
 config.TRAIN.BEGIN_EPOCH = 0
-config.TRAIN.END_EPOCH = 1
+config.TRAIN.END_EPOCH = 10
 
 config.TRAIN.RESUME = False
 config.TRAIN.CHECKPOINT = ''
