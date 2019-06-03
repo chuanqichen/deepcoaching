@@ -106,15 +106,10 @@ class JointsDataset(Dataset):
                 joints, joints_vis = fliplr_joints(joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
                 c[0] = data_numpy.shape[1] - c[0] - 1
             
-            # brighten image by shifting up all pixels
-            if self.brighten and random.random() <= 0.5:
-                shift = 10 * np.random.randn() + 20
-                data_numpy = np.fmax(data_numpy + shift, 255) 
-            
-            # darken image by shifting up all pixels
-            if self.darken and random.random() <= 0.5:
-                shift = 10 * np.random.randn() + 20
-                data_numpy = np.fmin(data_numpy - shift, 0)
+            # brighten/darken image by shifting all pixels. not sure if this actually helps
+#             if self.brighten and random.random() <= 0.5:
+#                 shift = 2 * np.random.randn()
+#                 data_numpy = np.clip(data_numpy + shift, 0, 255).astype(np.uint8)
                 
         trans = get_affine_transform(c, s, r, self.image_size)
         
