@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class MPIIDataset(JointsDataset):
-    def __init__(self, cfg, root, image_set, is_train, transform=None):
+    def __init__(self, cfg, root, image_set, is_train, transform=None, is_eval=False, eval_image=''):
         super().__init__(cfg, root, image_set, is_train, transform)
 
         self.num_joints = 16
@@ -35,19 +35,23 @@ class MPIIDataset(JointsDataset):
 
         if is_train and cfg.DATASET.SELECT_DATA:
             self.db = self.select_data(self.db)
+            
+        if is_eval:
+            self.db = [self.db[0]]
+            self.db[0]['image'] = eval_image
 
         logger.info('=> load {} samples'.format(len(self.db)))
 
     def _get_db(self):
         # create train/val split
-        file_name = os.path.join(self.root,
-                                 'annot',
-                                 self.image_set+'.json')
+        file_name = os.path.join(self.root, 'annot', self.image_set+'.json')
+        
         with open(file_name) as anno_file:
             anno = json.load(anno_file)
 
         with open('image_name_to_activity.json') as json_file:  
             activities = og_json.load(json_file)
+        
         self.removed = []
         self.kept = []
             
@@ -73,20 +77,18 @@ class MPIIDataset(JointsDataset):
                 joints = np.array(a['joints'])
                 joints[:, 0:2] = joints[:, 0:2] - 1
                 joints_vis = np.array(a['joints_vis'])
-                assert len(joints) == self.num_joints, \
-                    'joint num diff: {} vs {}'.format(len(joints),
-                                                      self.num_joints)
-
+                assert len(joints) == self.num_joints, 'joint num diff: {} vs {}'.format(len(joints), self.num_joints)
                 joints_3d[:, 0:2] = joints[:, 0:2]
                 joints_3d_vis[:, 0] = joints_vis[:]
                 joints_3d_vis[:, 1] = joints_vis[:]
 
             image_dir = 'images.zip@' if self.data_format == 'zip' else 'images'
             
-            # restrict it to just sports stuff. 677 samples
-            if activities[image_name]['cat_name'] != 'sports':
-                self.removed.append(index)
-                continue
+            # restrict it to certain categories
+#             if activities[image_name]['cat_name'] != 'winter activities':
+#                 self.removed.append(index)
+#                 continue
+            
             self.kept.append(index)
                 
             gt_db.append({
@@ -98,7 +100,7 @@ class MPIIDataset(JointsDataset):
                 'filename': '',
                 'imgnum': 0,
                 })
-
+    
         return gt_db
 
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
@@ -124,13 +126,13 @@ class MPIIDataset(JointsDataset):
         pos_gt_src = gt_dict['pos_gt_src']
         headboxes_src = gt_dict['headboxes_src']
 
-            
-        # restrict it to just sports stuff. 677 samples  
+        # use self.kept in case any data was filtered (or added) 
         dataset_joints = gt_dict['dataset_joints']
+
         jnt_missing = jnt_missing[:, self.kept]
         pos_gt_src = pos_gt_src[:, :, self.kept]
         headboxes_src = headboxes_src[:, :, self.kept]
-
+                
         pos_pred_src = np.transpose(preds, [1, 2, 0])
 
         head = np.where(dataset_joints == 'head')[1][0]

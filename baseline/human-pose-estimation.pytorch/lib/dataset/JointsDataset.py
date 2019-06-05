@@ -42,12 +42,16 @@ class JointsDataset(Dataset):
         self.scale_factor = cfg.DATASET.SCALE_FACTOR
         self.rotation_factor = cfg.DATASET.ROT_FACTOR
         self.flip = cfg.DATASET.FLIP
-
+        self.brighten = cfg.DATASET.BRIGHTEN
+        self.darken = cfg.DATASET.DARKEN
+        
         self.image_size = cfg.MODEL.IMAGE_SIZE
         self.target_type = cfg.MODEL.EXTRA.TARGET_TYPE
         self.heatmap_size = cfg.MODEL.EXTRA.HEATMAP_SIZE
         self.sigma = cfg.MODEL.EXTRA.SIGMA
 
+        self.cfg = cfg
+        
         self.transform = transform
         self.db = []
 
@@ -78,7 +82,7 @@ class JointsDataset(Dataset):
         if data_numpy is None:
             logger.error('=> fail to read {}'.format(image_file))
             raise ValueError('Fail to read {}'.format(image_file))
-
+            
         joints = db_rec['joints_3d']
         joints_vis = db_rec['joints_3d_vis']
 
@@ -87,26 +91,37 @@ class JointsDataset(Dataset):
         score = db_rec['score'] if 'score' in db_rec else 1
         r = 0
 
+        ############################################## data augmentation
         if self.is_train:
+            
+            # scale and rotation augmentation
             sf = self.scale_factor
             rf = self.rotation_factor
-            s = s * np.clip(np.random.randn()*sf + 1, 1 - sf, 1 + sf)
-            r = np.clip(np.random.randn()*rf, -rf*2, rf*2) \
-                if random.random() <= 0.6 else 0
+            s = s * np.clip(np.random.randn() * sf + 1, 1 - sf, 1 + sf)
+            r = np.clip(np.random.randn() * rf, -rf*2, rf*2) if random.random() <= 0.6 else 0
 
+            # flips images
             if self.flip and random.random() <= 0.5:
                 data_numpy = data_numpy[:, ::-1, :]
-                joints, joints_vis = fliplr_joints(
-                    joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
+                joints, joints_vis = fliplr_joints(joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
                 c[0] = data_numpy.shape[1] - c[0] - 1
-
+            
+            # brighten/darken image by shifting all pixels. not sure if this actually helps
+#             if self.brighten and random.random() <= 0.5:
+#                 shift = 2 * np.random.randn()
+#                 data_numpy = np.clip(data_numpy + shift, 0, 255).astype(np.uint8)
+                
         trans = get_affine_transform(c, s, r, self.image_size)
-        input = cv2.warpAffine(
-            data_numpy,
-            trans,
-            (int(self.image_size[0]), int(self.image_size[1])),
-            flags=cv2.INTER_LINEAR)
-
+        
+        # NOTE: This scales images and crops them to be 256*256. During eval, replace with input = data_numpy   
+        input = data_numpy
+        if not 'TEST_MODE' in self.cfg:
+            input = cv2.warpAffine(
+                data_numpy,
+                trans,
+                (int(self.image_size[0]), int(self.image_size[1])),
+                flags=cv2.INTER_LINEAR)
+        
         if self.transform:
             input = self.transform(input)
 
@@ -187,7 +202,8 @@ class JointsDataset(Dataset):
             tmp_size = self.sigma * 3
 
             for joint_id in range(self.num_joints):
-                feat_stride = self.image_size / self.heatmap_size
+                # feat_stride = self.image_size / self.heatmap_size
+                feat_stride = [x/y for x, y in zip(self.image_size, self.heatmap_size)]
                 mu_x = int(joints[joint_id][0] / feat_stride[0] + 0.5)
                 mu_y = int(joints[joint_id][1] / feat_stride[1] + 0.5)
                 # Check that any part of the gaussian is in-bounds

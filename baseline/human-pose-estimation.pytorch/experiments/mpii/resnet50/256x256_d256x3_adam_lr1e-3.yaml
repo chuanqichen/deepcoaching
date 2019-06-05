@@ -1,6 +1,6 @@
 GPUS: '0'
 DATA_DIR: ''
-OUTPUT_DIR: 'output'
+OUTPUT_DIR: 'output_inception'
 LOG_DIR: 'log'
 WORKERS: 4
 PRINT_FREQ: 100
@@ -48,7 +48,7 @@ TRAIN:
   SHUFFLE: true
   BEGIN_EPOCH: 0
   END_EPOCH: 140
-  RESUME: false
+  RESUME: true
   OPTIMIZER: adam
   LR: 0.001
   LR_FACTOR: 0.1

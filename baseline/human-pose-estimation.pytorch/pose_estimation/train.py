@@ -95,6 +95,9 @@ def main():
 
     # copy model file
     this_dir = os.path.dirname(__file__)
+
+    print(os.path.join(this_dir, '../lib/models', config.MODEL.NAME + '.py'))
+    print(final_output_dir)
     shutil.copy2(
         os.path.join(this_dir, '../lib/models', config.MODEL.NAME + '.py'),
         final_output_dir)
@@ -126,8 +129,10 @@ def main():
     )
 
     # Data loading code
+    # lol where are these magic number from ???
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
+    
     train_dataset = eval('dataset.'+config.DATASET.DATASET)(
         config,
         config.DATASET.ROOT,
@@ -138,6 +143,7 @@ def main():
             normalize,
         ])
     )
+    
     valid_dataset = eval('dataset.'+config.DATASET.DATASET)(
         config,
         config.DATASET.ROOT,
@@ -156,6 +162,7 @@ def main():
         num_workers=config.WORKERS,
         pin_memory=True
     )
+    
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset,
         batch_size=config.TEST.BATCH_SIZE*len(gpus),

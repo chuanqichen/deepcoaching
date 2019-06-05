@@ -49,6 +49,7 @@ MODEL_EXTRAS = {
 # common params for NETWORK
 config.MODEL = edict()
 config.MODEL.NAME = 'pose_resnet'
+config.MODEL.BLOCK = 'InceptionBlock'
 config.MODEL.INIT_WEIGHTS = True
 config.MODEL.PRETRAINED = ''
 config.MODEL.NUM_JOINTS = 16
@@ -62,7 +63,7 @@ config.LOSS.USE_TARGET_WEIGHT = True
 
 # DATASET related params
 config.DATASET = edict()
-config.DATASET.ROOT = ''
+config.DATASET.ROOT = '/home/shared/deepcoaching/baseline/human-pose-estimation.pytorch/data/mpii'
 config.DATASET.DATASET = 'mpii'
 config.DATASET.TRAIN_SET = 'train'
 config.DATASET.TEST_SET = 'valid'
@@ -74,6 +75,8 @@ config.DATASET.SELECT_DATA = False
 config.DATASET.FLIP = True
 config.DATASET.SCALE_FACTOR = 0.25
 config.DATASET.ROT_FACTOR = 30
+config.DATASET.BRIGHTEN = False
+config.DATASET.DARKEN = False
 
 # train
 config.TRAIN = edict()
@@ -90,7 +93,7 @@ config.TRAIN.GAMMA1 = 0.99
 config.TRAIN.GAMMA2 = 0.0
 
 config.TRAIN.BEGIN_EPOCH = 0
-config.TRAIN.END_EPOCH = 140
+config.TRAIN.END_EPOCH = 10
 
 config.TRAIN.RESUME = False
 config.TRAIN.CHECKPOINT = ''
