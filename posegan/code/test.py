@@ -67,14 +67,12 @@ def test(model_name, gpu_id):
 
             x_img = next(img_feed)
             x_pos = next(pos_feed)
-            x_pos = next(pos_feed)
-            x_pos = next(pos_feed)
-            x_pos = next(pos_feed)
 
             gen = tf.get_default_graph().get_tensor_by_name("loss/add_2_loss/lambda_5/add:0")
             inp = tf.get_default_graph().get_tensor_by_name("in_img0:0")
-            image_summary_op = tf.summary.image('images', [inp[0, :, :, :], gen[0, :, :, :]], max_outputs=100)
-            image_summary = sess.run(image_summary_op, feed_dict={"in_img0:0" : x_img[0], "in_pose0:0" : x_img[1], "in_pose1:0" : x_pos[2], "mask_prior:0" : x_img[3], "trans_in:0" : x_img[4]})
+            tgtp = tf.get_default_graph().get_tensor_by_name("in_img1:0")
+            image_summary_op = tf.summary.image('images', [inp[0, :, :, :], gen[0, :, :, :], tgtp[0, :, :, :]], max_outputs=100)
+            image_summary = sess.run(image_summary_op, feed_dict={"in_img0:0" : x_img[0], "in_img1:0":x_pos[0], "in_pose0:0" : x_img[1], "in_pose1:0" : x_pos[2], "mask_prior:0" : x_img[3], "trans_in:0" : x_img[4]})
             summary_writer.add_summary(image_summary)
 
 
